@@ -1,0 +1,35 @@
+I've seen many different ways of doing a timed poll (incrementing for loops,
+decrementing for loops, while loops, do loops, etc.), so I thought there might
+be some benefit to doing these timed polls in a common way.  I came up with a
+timed_poll() function that I thought worked well.
+
+/*
+ * timed_poll() polls a condition, and if that condition has not occurred,
+ * repeats the poll after a specified time delay up to a specified number
+ * of delays.
+ *
+ * timed_poll() returns a boolean:
+ * true if the condition occurred.
+ * false if the maximum delay was reached before the condition occurred.
+ *
+ * timed_poll() takes four arguments:
+ * 1) the maximum number of delays between polls before timed_poll returns
+ * a boolean false (Note the number of polls taken will be one greater than
+ * the number of delays since an initial poll is taken before the first delay),
+ * 2) a pointer to a delay function that takes an argument for units of delay,
+ * 3) the units of time delay duration between polls in units per delay.
+ * 4) a pointer to a function that returns a boolean true if the condition
+ * being polled has occurred, or false if not.
+  *
+ * A delay calculation example:
+ * timed_poll(&condition_check, 5, &sleep_ms, 10);
+ * The maximum delay is:
+ * (number of delays) * (units of time delay) * (units of duration)
+ *     5 delays       *        ms/unit        * 10 units/delay = 50 ms
+ */
+
+extern bool timed_poll(uint64_t delays, void (*delay_function)(uint64_t),
+    uint64_t delay_duration, bool (*condtion_check)(void));
+
+The file timed_poll.c contains some example code showing how I envision
+implementing this function.
