@@ -20,7 +20,7 @@ timed_poll() function that I thought worked well.
  * 3) the units of time delay duration between polls in units per delay.
  * 4) a pointer to a function that returns a boolean true if the condition
  * being polled has occurred, or false if not.
-  *
+ *
  * A delay calculation example:
  * timed_poll(&condition_check, 5, &sleep_ms, 10);
  * The maximum delay is:
