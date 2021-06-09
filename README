@@ -31,6 +31,7 @@ timed_poll() function that I thought worked well.
  *      void (*delay_function)(uint32_t), uint32_t delay_duration);
  *
  * bool timed_poll(bool (*)(void), unsigned, int (*)(useconds_t), useconds_t);
+ * The maximum delay is:
 
 The file timed_poll.c contains some example code showing how I envision
 implementing this function.
