@@ -1,12 +1,6 @@
-/*
- * Sleep for no less than "ms" milliseconds.
- * sleep_ms() is an as yet unimplemented nanosleep() wrapper function.
- */
-extern void sleep_ms(uint32_t ms);
-
 /*******************************************************************************
- * timed_poll.c: Poll a condition, and if that condition has not occurred,
- * repeat the poll after a specified time delay up to a specified number
+ * timed_poll.cc: Poll a condition, and if that condition has not occurred,
+ * repeats the poll after a specified time delay up to a specified number
  * of repeats.
  *
  * Created by: Dan Nygren
@@ -27,16 +21,18 @@ extern void sleep_ms(uint32_t ms);
  *
  * Example declarations:
  *
- * extern bool timed_poll(bool (*condtion_check)(void), uint32_t repeats,
- *      void (*delay_function)(uint32_t), uint32_t delay_duration);
+ * Function prototype when using #include <unistd.h> for usleep()
+ * bool timed_poll(bool (*)(void), unsigned,
+ *              int (*)(useconds_t), useconds_t);
  *
- * bool timed_poll(bool (*)(void), unsigned, int (*)(useconds_t), useconds_t);
- *
+ * Function prototype when using #include "sleep.h" for usleep()
+ * bool timed_poll(bool (*)(void), unsigned,
+ *              void (*)(unsigned long), unsigned long);
  *
  * CALL SEQUENCE bool timed_poll(bool (*condition_check)(void),
  *                      unsigned repeats,
- *                      int (*delay_function)(useconds_t),
- *                      useconds_t delay_duration);
+ *                      int/void (*delay_function)(useconds_t/unsigned long),
+ *                      useconds_t/unsigned long delay_duration);
  *
  * EXAMPLES      timed_poll(&condition_check, 5, &usleep, 10);
  *
@@ -44,7 +40,7 @@ extern void sleep_ms(uint32_t ms);
  * timed_poll(&condition_check, 5, &usleep, 10);
  * The maximum delay is:
  * (number of repeats) * (units of time delay) * (units of duration) =
- *     5 repeats       *        ms/unit        * 10 units/repeat      = 50 ms
+ *     5 repeats       *        ms/unit        * 10 units/repeat     = 50 ms
  *
  * TARGET SYSTEM Linux
  *
@@ -68,8 +64,39 @@ extern void sleep_ms(uint32_t ms);
  *               (2. Describe anything a maintainer should be aware of)
  *               (N. Describe anything a maintainer should be aware of)
  ******************************************************************************/
-#include <unistd.h> // For usleep()
+#include "IR3C.hpp"
 
+#ifdef SLEEP_H
+/*
+ * The function prototype for usleep() in sleep.h is
+ *
+ * void usleep(unsigned long useconds);
+ */
+bool timed_poll(bool (*condition_check)(void), unsigned repeats,
+    void (*delay_function)(unsigned long), unsigned long delay_duration) {
+    for (; repeats > 0; repeats--) {
+        if (condition_check()) /* Poll before delay */
+            return true;
+        delay_function(delay_duration);
+    }
+    /*
+     * Final poll after the last delay has occurred (or the only
+     * poll if this function was called with repeats == 0)
+     */
+    return condition_check();
+}
+
+#endif
+
+#ifdef _UNISTD_H_
+/*
+ * The function prototype for usleep() in unistd.h is
+ *
+ * #define      _EXFUN(name, proto)             name proto
+ * int  _EXFUN(usleep, (useconds_t __useconds));
+ */
+
+// #include <unistd.h> // For usleep()
 bool timed_poll(bool (*condition_check)(void), unsigned repeats,
     int (*delay_function)(useconds_t), useconds_t delay_duration) {
     for (; repeats > 0; repeats--) {
@@ -83,6 +110,8 @@ bool timed_poll(bool (*condition_check)(void), unsigned repeats,
      */
     return condition_check();
 }
+
+#endif
 
 static bool check_status_reg(void) {
     if (GET_STATUS(STATUS_REG) != 0)

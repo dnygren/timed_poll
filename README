@@ -1,6 +1,7 @@
-I've seen many different ways of doing a timed poll (incrementing for loops,
-decrementing for loops, while loops, do loops, etc.), so I thought there might
-be some benefit to doing these timed polls in a common way. I came up with a
+I've seen many different ways of performing a timed poll (i.e. checking for a
+condition, and if the condition isn't met, repeat the check a specified number
+of times after a specified time delay) so I thought there might be
+some benefit to doing these timed polls in a common way. I came up with a
 timed_poll() function that I thought worked well.
 
 /*
@@ -24,14 +25,7 @@ timed_poll() function that I thought worked well.
  * timed_poll() returns a boolean:
  * true if the condition occurred
  * false if the maximum delay was reached before the condition occurred.
- *
- * Example declarations:
- *
- * extern bool timed_poll(bool (*condtion_check)(void), uint32_t repeats,
- *      void (*delay_function)(uint32_t), uint32_t delay_duration);
- *
- * bool timed_poll(bool (*)(void), unsigned, int (*)(useconds_t), useconds_t);
- * The maximum delay is:
+ */
 
 The file timed_poll.c contains some example code showing how I envision
 implementing this function.
